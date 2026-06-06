@@ -747,8 +747,10 @@ struct CheckPoint
   bool    fullPageWrites;
   padding[3];
   u32     wal_level;
-  bool   logicalDecodingEnabled;
-  padding[7];
+  if (pg_version >= 19) {
+    bool   logicalDecodingEnabled;
+    padding[7];
+  }
   FullTransactionId nextXid;
   Oid     nextOid;
   MultiXactId nextMulti;
@@ -762,6 +764,9 @@ struct CheckPoint
   MultiXactId oldestMulti;
   Oid     oldestMultiDB;
 
+  if (pg_version < 19) {
+    padding[4];
+  }
   pg_time_t time;
   TransactionId oldestCommitTsXid;
   TransactionId newestCommitTsXid;
@@ -971,6 +976,7 @@ struct xl_heap_truncate {
   Oid dbId;
   u32 nrelids;
   u8 flags;
+  padding[3];
   Oid relids[nrelids];
 };
 
