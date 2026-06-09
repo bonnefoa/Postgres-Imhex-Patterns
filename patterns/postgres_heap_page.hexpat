@@ -11,7 +11,7 @@ using XLogRecPtr = u64 [[format("format_xlogrecptr")]];
 using OffsetNumber = u16;
 
 fn format_xlogrecptr(auto rec_ptr) {
-    return std::format("{:X}/{:X}", rec_ptr >> 32, rec_ptr & 0xffffffff);
+    return std::format("{:X}/{:08X}", rec_ptr & 0xffffffff, rec_ptr >> 32);
 };
 
 struct PageHeaderData {
