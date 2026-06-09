@@ -247,7 +247,7 @@ import type.time;
 
 
 fn format_xlogrecptr(auto rec_ptr) {
-    return std::format("{:X}/{:X}", rec_ptr >> 32, rec_ptr & 0xffffffff);
+    return std::format("{:X}/{:08X}", rec_ptr >> 32, rec_ptr & 0xffffffff);
 };
 
 using TransactionId = u32;
