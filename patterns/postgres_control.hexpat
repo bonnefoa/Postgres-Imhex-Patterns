@@ -38,8 +38,10 @@ struct CheckPoint
   bool    fullPageWrites;
   padding[3];
   u32     wal_level;
-  bool   logicalDecodingEnabled;
-  padding[7];
+  if (pg_version >= 19) {
+    bool   logicalDecodingEnabled;
+    padding[7];
+  }
   FullTransactionId nextXid;
   Oid     nextOid;
   MultiXactId nextMulti;
@@ -48,6 +50,8 @@ struct CheckPoint
   } else {
     MultiXactOffset nextMultiOffset;
   }
+
+  padding[4];
   TransactionId oldestXid;
   Oid     oldestXidDB;
   MultiXactId oldestMulti;
