@@ -746,7 +746,7 @@ struct CheckPoint
   TimeLineID  PrevTimeLineID;
   bool    fullPageWrites;
   padding[3];
-  u32     wal_level;
+  s32     wal_level;
   if (pg_version >= 19) {
     bool   logicalDecodingEnabled;
     padding[7];
@@ -771,6 +771,10 @@ struct CheckPoint
   TransactionId oldestCommitTsXid;
   TransactionId newestCommitTsXid;
   TransactionId oldestActiveXid;
+
+  if (pg_version >= 19) {
+    u32 dataChecksumState;
+  }
 };
 
 struct xl_parameter_change {
@@ -1029,8 +1033,10 @@ struct xl_heap_rewrite_mapping {
   TransactionId mapped_xid;
   Oid mapped_db;
   Oid mapped_rel;
+  padding[4];
   u64 offset;
   u32 num_mappings;
+  padding[4];
   XLogRecPtr start_lsn;
 };
 
@@ -1071,8 +1077,12 @@ struct xlhp_prune_items {
 };
 
 struct xl_heap_prune {
-  u8 reason;
-  u8 flags;
+  if (pg_version >= 19) {
+    u16 flags;
+  } else {
+    u8 reason;
+    u8 flags;
+  }
   if (flags & XLHP_HAS_CONFLICT_HORIZON) {
     TransactionId conflict_horizon;
   }
@@ -1145,6 +1155,7 @@ struct xl_btree_update
 struct xl_btree_mark_page_halfdead
 {
 	OffsetNumber poffset;
+  padding[2];
 
 	/* information needed to recreate the leaf page: */
 	BlockNumber leafblk;
@@ -1158,8 +1169,9 @@ struct xl_btree_unlink_page
 	BlockNumber leftsib;
 	BlockNumber rightsib;
 	u32		level;
-	FullTransactionId safexid;
+  padding[4];
 
+	FullTransactionId safexid;
 	BlockNumber leafleftsib;
 	BlockNumber leafrightsib;
 	BlockNumber leaftopparent;
@@ -1178,7 +1190,8 @@ struct xl_btree_newroot
 
 struct xl_smgr_create {
     RelFileLocator rlocator;
-    u8 forkNum;
+    // TODO: Create ForkNumber enum
+    u32 forkNum;
 };
 
 struct xl_smgr_truncate {
@@ -1230,11 +1243,13 @@ struct xl_multixact_zeropage {
 
 struct MultiXactMember {
     TransactionId xid;
-    u8 status;
+    // TODO: Create MultiXactStatus enum
+    u32 status;
 };
 
 struct xl_multixact_create {
     MultiXactId mid;
+    padding[4];
     MultiXactOffset moff;
     s32 nmembers;
     MultiXactMember members[nmembers];
@@ -1311,6 +1326,7 @@ struct xl_hash_vacuum_one_page {
     TransactionId snapshotConflictHorizon;
     u16 ntuples;
     bool isCatalogRel;
+    padding[1];
     OffsetNumber offsets[ntuples];
 };
 
@@ -1336,8 +1352,24 @@ struct ginxlogDeletePage {
 	TransactionId deleteXid;
 };
 
+struct GinMetaPageData {
+	BlockNumber head;
+	BlockNumber tail;
+	u32         tailFreeSize;
+	BlockNumber nPendingPages;
+	s64         nPendingHeapTuples;
+	BlockNumber nTotalPages;
+	BlockNumber nEntryPages;
+	BlockNumber nDataPages;
+  padding[4];
+	s64         nEntries;
+	u32         ginVersion;
+};
+
 struct ginxlogUpdateMeta {
   RelFileLocator locator;
+  padding[4];
+  GinMetaPageData metadata;
 	BlockNumber prevTail;
 	BlockNumber newRightlink;
 	s32 ntuples;
@@ -1349,6 +1381,7 @@ struct ginxlogInsertListPage {
 };
 
 struct ginxlogDeleteListPages {
+  GinMetaPageData metadata;
   s32 ndeleted;
 };
 
@@ -1370,11 +1403,13 @@ struct gistxlogDelete {
     TransactionId snapshotConflictHorizon;
     u16 ntodelete;
     bool isCatalogRel;
+    padding[1];
     OffsetNumber offsets[1];
 };
 
 struct gistxlogPageSplit {
   BlockNumber origrlink;
+  padding[4];
 	u64 orignsn;
 	bool origleaf;
 	u16 npage;
@@ -1427,15 +1462,26 @@ struct spgxlogAddNode {
   OffsetNumber offnum;
 	OffsetNumber offnumNew;
 	bool newPage;
+  s8 parentBlk;
+  u16 nodeI;
+  padding[2];
+	spgxlogState stateSrc;
 };
 
 struct spgxlogVacuumLeaf {
   u16 nDead;
 	u16 nPlaceholder;
+	u16 nMove;
+	u16 nChain;
+	spgxlogState stateSrc;
+	OffsetNumber offsets[nDead + nPlaceholder + nMove + nChain];
 };
 
 struct spgxlogVacuumRoot {
   u16 nDelete;
+  padding[2];
+	spgxlogState stateSrc;
+	OffsetNumber offsets[nDelete];
 };
 
 struct spgxlogSplitTuple
@@ -1473,6 +1519,10 @@ struct spgxlogPickSplit
 struct spgxlogVacuumRedirect {
   u16 nToPlaceholder;
 	OffsetNumber firstPlaceholder;
+  TransactionId snapshotConflictHorizon;
+  bool isCatalogRel;
+  padding[1];
+	OffsetNumber offsets[nToPlaceholder];
 };
 
 struct xl_brin_createidx {
