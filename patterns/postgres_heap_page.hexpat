@@ -31,7 +31,7 @@ struct BlockIdData {
 } [[format("format_blk_id")]];
 
 fn format_blk_id(auto blk) {
-    auto blk_id = blk.bi_hi << 16 + blk.bi_lo;
+    auto blk_id = (blk.bi_hi << 16) + blk.bi_lo;
     return std::format("{}", blk_id);
 };
 
