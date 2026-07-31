@@ -313,6 +313,7 @@ fn is_page() {
       (0xD116): pg_version = 17;
       (0xD118): pg_version = 18;
       (0xD120): pg_version = 19;
+      (0xD121): pg_version = 20;
       (_): return false;
     }
     return true;
@@ -591,7 +592,7 @@ fn record_identify(RmgrId rmgr_id, u8 rmgr_info) {
         }
       }
     }
-    std::error(std::format("Unknown rmgrid: {}, info 0x{:X}", rmgr_id, info));
+    std::error(std::format("Unknown rmgrid: {}, info 0x{:X}", u8(rmgr_id), info));
 };
 
 bitfield ImageInfoFlags {
