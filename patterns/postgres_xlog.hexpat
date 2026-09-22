@@ -312,8 +312,9 @@ fn is_page() {
       (0xD113): pg_version = 16;
       (0xD116): pg_version = 17;
       (0xD118): pg_version = 18;
-      (0xD120): pg_version = 19;
-      (0xD121): pg_version = 20;
+      (0xD122): pg_version = 19;
+      // 19 and 20 currently share the same magic number, use 0xD123 for now
+      (0xD123): pg_version = 20;
       (_): return false;
     }
     return true;
