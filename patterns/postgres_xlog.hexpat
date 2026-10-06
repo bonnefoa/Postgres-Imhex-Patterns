@@ -1251,8 +1251,12 @@ struct MultiXactMember {
 
 struct xl_multixact_create {
     MultiXactId mid;
-    padding[4];
-    MultiXactOffset moff;
+    if (pg_version >= 19) {
+      padding[4];
+      MultiXactOffset moff;
+    } else {
+      MultiXactOffset_PG19 moff;
+    }
     s32 nmembers;
     MultiXactMember members[nmembers];
 };
@@ -1260,7 +1264,12 @@ struct xl_multixact_create {
 struct xl_multixact_truncate {
     Oid oldestMultiDB;
     MultiXactId oldestMulti;
-    MultiXactOffset oldestOffset;
+    if (pg_version >= 19) {
+      padding[4];
+      MultiXactOffset oldestOffset;
+    } else {
+      MultiXactOffset_PG19 oldestOffset;
+    }
 };
 
 struct xl_relmap_update {
