@@ -314,7 +314,7 @@ fn is_page() {
       (0xD116): pg_version = 17;
       (0xD118): pg_version = 18;
       (0xD122): pg_version = 19;
-      // 19 and 20 currently share the same magic number, use 0xD123 for now
+      // 19 and 20 currently share the same magic number, use 0xD123 for 20 in the meantime
       (0xD123): pg_version = 20;
       (_): return false;
     }
@@ -1960,7 +1960,7 @@ struct XLogPageHeader {
     u32 xlp_xlog_blcksz;
     global_page_size = xlp_xlog_blcksz;
   }
-};
+} [[inline]];
 
 bool is_first_page = true;
 std::mem::Section page_content;
@@ -2001,6 +2001,10 @@ struct XLogPage {
 
   // Copy the page content to the virtual file
   std::mem::copy_value_to_section(record_data, page_content, std::mem::get_section_size(page_content));
+} [[format("format_xlog_page")]];
+
+fn format_xlog_page(auto page) {
+    return std::format("addr: {}", format_xlogrecptr(page.page_header.xlp_pageaddr));
 };
 
 
