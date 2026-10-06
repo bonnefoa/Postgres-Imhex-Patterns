@@ -1203,11 +1203,11 @@ struct xl_smgr_truncate {
 };
 
 struct xl_clog_zeropage {
-  s64 pageno;
+    u32 pageno;
 };
 
 struct xl_clog_truncate {
-    s64 pageno;
+    u32 pageno;
     TransactionId oldestXact;
     Oid oldestXactDb;
 };
