@@ -282,6 +282,7 @@ u32 buffer_end_addr;
 u32 requested_data;
 
 u32 limitRecords in;
+u64 start_lsn in;
 u32 nrecords = 0;
 
 struct BlockIdData {
@@ -2026,6 +2027,10 @@ struct Data {
   pg_version = fake_version;
   global_page_addr = fake_page_addr;
   std::mem::AlignTo<0x28>;
+  if (start_lsn > 0) {
+    std::warning(std::format("Starting at lsn {}", start_lsn));
+    $ = start_lsn;
+  }
   XLogRecord records[while(std::mem::read_unsigned($, 4) > 0 && (nrecords < limitRecords || limitRecords == 0))];
   return;
 } [[inline]];
