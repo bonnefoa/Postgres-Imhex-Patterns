@@ -2,6 +2,8 @@
 
 A collection of [Imhex](https://imhex.werwolv.net/) pattern language (`.hexpat`) files for inspecting PostgreSQL files.
 
+<img width="1292" height="1205" alt="imhex screenshot" src="https://github.com/user-attachments/assets/708102e8-bd54-43d3-9923-79e18dad54a4" />
+
 ## Patterns
 
 | File | Description |
